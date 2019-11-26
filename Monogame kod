@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using System;
 
 namespace Template
 {
@@ -15,13 +16,20 @@ namespace Template
         Texture2D tennisball2;
         Vector2 tennisball2Pos = new Vector2(10, 10);
         List<Vector2> bulletPos = new List<Vector2>();
+        List<Vector2> enemiesPos = new List<Vector2>();
         KeyboardState kNewState = Keyboard.GetState();
         KeyboardState kOldState;
-        //KOmentar
+
+        Random rand = new Random();
+        int Random;
+        int enemieSpawn;
+        //Komentar
         public Game1()
         {
+            
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            graphics.PreferredBackBufferHeight = 480;
 
         }
 
@@ -34,7 +42,6 @@ namespace Template
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
             base.Initialize();
         }
 
@@ -75,22 +82,31 @@ namespace Template
 
             kNewState = Keyboard.GetState();
 
-            if (kNewState.IsKeyDown(Keys.Right))
-            {
-                tennisball2Pos.X += 10;
+            if (tennisball2Pos.X + 50 < 800) {
+                if (kNewState.IsKeyDown(Keys.Right))
+                {
+                    tennisball2Pos.X += 10;
+                }
             }
-            if (kNewState.IsKeyDown(Keys.Left))
-            {
-                tennisball2Pos.X -= 10;
+            if (tennisball2Pos.X > 0) {
+                if (kNewState.IsKeyDown(Keys.Left))
+                {
+                    tennisball2Pos.X -= 10;
+                }
             }
 
-            if (kNewState.IsKeyDown(Keys.Up))
-            {
-                tennisball2Pos.Y -= 10;
+            if (tennisball2Pos.Y > 0) {
+                if (kNewState.IsKeyDown(Keys.Up))
+                {
+                    tennisball2Pos.Y -= 10;
+                }
             }
-            if (kNewState.IsKeyDown(Keys.Down))
+            if (tennisball2Pos.Y + 50 < 480)
             {
-                tennisball2Pos.Y += 10;
+                if (kNewState.IsKeyDown(Keys.Down))
+                {
+                    tennisball2Pos.Y += 10;
+                }
             }
 
             if (kNewState.IsKeyDown(Keys.Space) && kOldState.IsKeyUp(Keys.Space))
@@ -99,7 +115,45 @@ namespace Template
             }
             for (int i = 0; i < bulletPos.Count; i++)
             {
-                bulletPos[i] = bulletPos[i] - new Vector2(0, 7);
+                bulletPos[i] -= new Vector2(0, 20);
+                if (bulletPos[i].Y < 10)
+                {
+                    bulletPos.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            //Enemies
+            Random = rand.Next(1, 190);
+            enemieSpawn = rand.Next(40, 760);
+            if (Random == 4)
+            {
+                enemiesPos.Add(new Vector2(enemieSpawn, -40)); ;
+            }
+            if (enemiesPos.Count > 0)
+            {
+                for (int i = 0; i < enemiesPos.Count; i++)
+                {
+                    enemiesPos[i] += new Vector2(0, 2);
+                    if (enemiesPos[i].Y > 440)
+                    {
+                        enemiesPos.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+
+            for (int i = 0; i < enemiesPos.Count; i++)
+            {
+                for (int p = 0; i < bulletPos.Count; i++)
+                {
+                    if (bulletPos[p] == enemiesPos[i])
+                    {
+                        enemiesPos.RemoveAt(i);
+                        i++;
+                    }
+                }
+
             }
 
             kOldState = kNewState;
@@ -130,7 +184,14 @@ namespace Template
             {
                 rec.Location = bulletPos[i].ToPoint();
                 rec.Size = new Point(10, 10);
-                spriteBatch.Draw(tennisball2, rec, Color.White);
+                spriteBatch.Draw(tennisball2, rec, Color.Red);
+            }
+
+            for (int i = 0; i < enemiesPos.Count; i++)
+            {
+                rec.Location = enemiesPos[i].ToPoint();
+                rec.Size = new Point(30, 40);
+                spriteBatch.Draw(tennisball2, rec, Color.Purple);
             }
 
             spriteBatch.End();
